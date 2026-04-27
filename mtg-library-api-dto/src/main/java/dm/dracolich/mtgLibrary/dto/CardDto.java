@@ -41,7 +41,6 @@ public class CardDto {
     private CardFaceDto flippedFace;
     @JsonProperty("all_parts")
     private List<RelatedCardPartDto> allParts;
-    // Populated service-side with the chosen printing (default: cheapest non-foil).
     @JsonProperty("default_art")
     private ArtPropertyDto defaultArt;
 }
