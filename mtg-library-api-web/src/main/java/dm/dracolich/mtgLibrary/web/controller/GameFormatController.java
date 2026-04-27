@@ -12,9 +12,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("formats")
@@ -29,7 +31,17 @@ public class GameFormatController {
                     content = @Content(schema = @Schema(implementation = GameFormatDto.class)))
     })
     @GetMapping(path = {"/"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<GameFormatDto> fetchRulingById() {
+    public Flux<GameFormatDto> fetchAllFormats() {
         return service.fetchAllFormats();
+    }
+
+    @Operation(summary = "Fetch all game formats", description = "Returns all game formats")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Game formats fetched successfully",
+                    content = @Content(schema = @Schema(implementation = GameFormatDto.class)))
+    })
+    @GetMapping(path = {"/{code}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<GameFormatDto> fetchFormatByCode(@PathVariable String code) {
+        return service.fetchFormatByCode(code);
     }
 }

@@ -54,6 +54,8 @@ public class CardServiceImpl implements CardService {
     @Override
     public Mono<CardDto> fetchCardByName(String name) {
         return repo.findByNameIgnoreCase(name)
+                .switchIfEmpty(Mono.defer(() -> repo.findByDefaultFaceNameIgnoreCase(name)))
+                .switchIfEmpty(Mono.defer(() -> repo.findByFlippedFaceNameIgnoreCase(name)))
                 .switchIfEmpty(Mono.error(notFound("card", "name", name)))
                 .flatMap(this::withDefaultArt);
     }

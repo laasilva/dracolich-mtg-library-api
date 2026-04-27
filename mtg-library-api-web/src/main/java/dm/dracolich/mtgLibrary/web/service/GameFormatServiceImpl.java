@@ -6,6 +6,7 @@ import dm.dracolich.mtgLibrary.web.repository.GameFormatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +17,12 @@ public class GameFormatServiceImpl implements GameFormatService {
     @Override
     public Flux<GameFormatDto> fetchAllFormats() {
         return repository.findAll()
+                .map(mapper::entityToDto);
+    }
+
+    @Override
+    public Mono<GameFormatDto> fetchFormatByCode(String code) {
+        return repository.findByCode(code)
                 .map(mapper::entityToDto);
     }
 }

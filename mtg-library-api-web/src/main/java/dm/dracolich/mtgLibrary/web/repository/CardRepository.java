@@ -10,4 +10,6 @@ public interface CardRepository extends ReactiveMongoRepository<CardEntity, Stri
         ReactiveQueryByExampleExecutor<CardEntity>, CardCustomRepository {
     Mono<CardEntity> findByNameIgnoreCase(String name);
     Mono<CardEntity> findByOracleId(String oracleId);
+    Mono<CardEntity> findByDefaultFaceNameIgnoreCase(String name);
+    Mono<CardEntity> findByFlippedFaceNameIgnoreCase(String name);
 }
