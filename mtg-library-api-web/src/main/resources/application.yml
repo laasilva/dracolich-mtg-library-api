@@ -16,3 +16,16 @@ server:
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+management:
+  server:
+    port: 7980
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+    endpoint:
+      health:
+        show-details: true
+        probes:
+          enabled: true
