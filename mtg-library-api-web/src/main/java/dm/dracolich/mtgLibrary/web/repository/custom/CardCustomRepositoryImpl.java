@@ -14,7 +14,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class CardCustomRepositoryImpl implements CardCustomRepository {
@@ -61,13 +64,13 @@ public class CardCustomRepositoryImpl implements CardCustomRepository {
                 filters.add(eitherFace("oracle_text").regex(search.oracleText(), "i"));
 
             if (search.colorIdentity() != null && !search.colorIdentity().isEmpty())
-                filters.add(eitherFaceGameplay("color_identity").all(search.colorIdentity()));
+                filters.add(eitherFaceGameplay("color_identity").all(enumNames(search.colorIdentity())));
 
             if (search.colors() != null && !search.colors().isEmpty())
-                filters.add(eitherFaceGameplay("colors").all(search.colors()));
+                filters.add(eitherFaceGameplay("colors").all(enumNames(search.colors())));
 
             if (search.types() != null && !search.types().isEmpty())
-                filters.add(eitherFace("types").all(search.types()));
+                filters.add(eitherFace("types").all(enumNames(search.types())));
 
             if (search.subtypes() != null && !search.subtypes().isEmpty())
                 filters.add(eitherFace("subtypes").all(search.subtypes()));
@@ -115,6 +118,10 @@ public class CardCustomRepositoryImpl implements CardCustomRepository {
         );
     }
 
+    private static List<String> enumNames(Set<? extends Enum<?>> values) {
+        return values.stream().map(Enum::name).collect(Collectors.toList());
+    }
+
     private record EitherFaceBuilder(String defaultPath, String flippedPath) {
         Criteria regex(String pattern, String options) {
             return new Criteria().orOperator(
@@ -123,7 +130,7 @@ public class CardCustomRepositoryImpl implements CardCustomRepository {
             );
         }
 
-        Criteria all(Object values) {
+        Criteria all(Collection<?> values) {
             return new Criteria().orOperator(
                     Criteria.where(defaultPath).all(values),
                     Criteria.where(flippedPath).all(values)
