@@ -5,31 +5,41 @@ A reactive REST API for Magic: The Gathering card data, powered by Scryfall bulk
 ## Prerequisites
 
 - Java 25
-- MongoDB running on `localhost:27017`
 - Maven 3.9+
+- `~/.m2/settings-personal.xml` with GitHub Packages credentials (for `dm.dracolich.*` artifacts)
+- MongoDB — only if you intend to *run* it
 
-## Quick Start
+## Build
 
 ```bash
-# Build
 mvn clean install -s ~/.m2/settings-personal.xml
-
-# Run (port 8080, dev profile auto-active)
-mvn spring-boot:run -pl mtg-library-api-web -s ~/.m2/settings-personal.xml
 ```
 
-The API starts on `http://localhost:8080/dracolich/mtg-library/api/v0/`.
+## Running
 
-Swagger UI is available at `http://localhost:8080/dracolich/mtg-library/api/v0/swagger-ui.html`.
+The service is deployed to the `dracolich-dev` cluster and reached through
+`https://dev.dracolich.app/dracolich/mtg-library/api/v0/`. Backend changes reach it through the CI
+pipeline (see the workspace `CLAUDE.md`), so `mvn clean install` is the verification step for code
+work.
+
+Running it locally is expected when developing a feature or chasing a bug here — just avoid standing
+up the whole ecosystem when only a couple of services are involved. Create an uncommitted
+`mtg-library-api-web/src/main/resources/application-local.yml` and run with
+`SPRING_PROFILES_ACTIVE=local`. It is gitignored and must stay that way — never commit local config.
+There is no template for this service, and `spring.mongodb.uri`, `spring.mongodb.database` and
+`cors.allowed-origins` have no defaults.
+
+Swagger UI: `http://<host>/dracolich/mtg-library/api/v0/swagger-ui.html`.
 
 ## Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `8080` | Server port |
-| `MONGODB_URI` | `mongodb://localhost:27017/dracolich-mtg-library` | MongoDB connection URI |
-| `MONGODB_DATABASE` | `dracolich-mtg-library` | Database name |
-| `CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` | Allowed CORS origins |
+| `PORT` | `8080` | Server port. Actuator listens separately on `7980`. |
+| `MONGODB_URI` | _(required)_ | MongoDB connection URI |
+| `MONGODB_DATABASE` | _(required)_ | Database name |
+| `CORS_ALLOWED_ORIGINS` | _(required)_ | Allowed CORS origins |
+| `SPRING_PROFILES_ACTIVE` | `dev` | Profile name only — no profile-specific config file exists |
 
 ## API Endpoints
 
@@ -179,8 +189,21 @@ dracolich-mtg-library-api/
 - **Lombok** for boilerplate reduction
 - **forge:common** for DmdResponse envelope, error handling
 
+## Known Gaps
+
+Tracked because they block the frontend:
+
+- **No `GET /cards/{id}/arts`** (or an `arts: []` array on the card detail response). Only
+  `defaultArt` ships, which blocks the art-version scroller in `dracolich-mtg-ui`.
+- **`GET /cards/{id}` swallows `/cards/search`** on some matches — the path variable route needs a
+  regex constraint or to be declared after the literal routes.
+
 ## Running Tests
 
-```bash
-mvn test -s ~/.m2/settings-personal.xml
-```
+There are none yet — 108 main classes, 0 test classes. Test dependencies are declared but unused.
+
+---
+
+Part of the [Dracolich](https://github.com/laasilva?tab=repositories&q=dracolich) platform. For the
+cross-repo picture — service topology, release pipeline, shared conventions — see the workspace guide
+at `~/Dev/Dracolich/CLAUDE.md`.
